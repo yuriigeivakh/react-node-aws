@@ -8,6 +8,10 @@ require('dotenv').config();
 
 const app = express();
 
+mongoose.connect(process.env.DATABASE_CLOUD, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('DB started'))
+    .catch(err => console.log(err))
+
 //aply middlewares
 app.use(morgan('dev'));
 app.use(bodyParser.json());
