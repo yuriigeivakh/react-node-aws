@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+
+const User = require('../models/user');registerEmailParams
+const registerEmailParams = require('../controllers/auth');
 
 AWS.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -17,48 +19,27 @@ exports.register = (req, res) => {
         if (err) {
             return res.status(400).json({
                 error: 'Email is taken'
-            })
+            });
         }
         //generate token
         const token = jwt.sign({name, password, email}, process.env.JWT_ACCOUNT_ACTIVATION, {
             expiresIn: '10m',
-        })
+        });
 
-        const params = {
-            Source: process.env.EMAIL_FROM,
-            Destination: {
-                ToAdresses: email,
-            },
-            ReplyToAdresses: [process.env.EMAIL_TO],
-            Message: {
-                Body: {
-                    Html: {
-                        Charset: 'UTF-8',
-                        Data: `
-                            <html>
-                                <body>
-                                <h1>Verify your email adress</h1>
-                                <p>Please use following link to complete your registration:</p>
-                                <p>${process.env.CLIENT_URL}/auth/activate/${token}</p>
-                                </body>
-                            </html>`,
-                    }
-                },
-                Subject: {
-                    Charset: 'UTF-8',
-                    Data: 'Complete your registration',
-                },
-            },
-        };
+        const emailParams = registerEmailParams(email, token);
     
-        const sendEmail = ses.sendEmail(params).promise();
+        const sendEmail = ses.sendEmail(emailParams).promise();
         sendEmail
             .then(data => {
-                res.send('Email sent')
+                res.json({
+                    message: `Email has been sent to ${email}. Follow the instructions to complete your registration.`
+                })
                 console.log(data)
             })
             .catch(err => {
-                res.send('Email failed')
+                res.json({
+                    error: `We could not verify your email. Please try again.`
+                })
                 console.log(err)
             })
     });
