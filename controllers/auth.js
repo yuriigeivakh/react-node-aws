@@ -1,16 +1,16 @@
 const AWS = require('aws-sdk');
 const jwt = require('jsonwebtoken');
 
-const User = require('../models/user');registerEmailParams
-const registerEmailParams = require('../controllers/auth');
+const User = require('../models/user');
+const { registerEmailParams } = require('../helpers/email');
 
 AWS.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
+    region: 'us-east-1',
 });
 
-const ses = AWS.SES({ apiVersion: '2010-12-01' });
+const ses = new AWS.SES({ apiVersion: '2010-12-01' });
 
 exports.register = (req, res) => {
     const { name, email, password } = req.body;
@@ -37,8 +37,8 @@ exports.register = (req, res) => {
                 console.log(data)
             })
             .catch(err => {
-                res.json({
-                    error: `We could not verify your email. Please try again.`
+                res.status(400).json({
+                    message: `We could not verify your email. Please try again.`
                 })
                 console.log(err)
             })

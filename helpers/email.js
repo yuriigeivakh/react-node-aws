@@ -2,9 +2,9 @@ exports.registerEmailParams = (email, token) => {
     return {
         Source: process.env.EMAIL_FROM,
         Destination: {
-            ToAdresses: email,
+            ToAddresses: [email],
         },
-        ReplyToAdresses: [process.env.EMAIL_TO],
+        ReplyToAddresses: [process.env.EMAIL_TO],
         Message: {
             Body: {
                 Html: {
