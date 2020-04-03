@@ -19,7 +19,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.5",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "shortid": "^2.2.15"
   },
   "devDependencies": {
     "express-validator": "^6.4.0"
