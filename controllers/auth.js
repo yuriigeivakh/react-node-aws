@@ -4,7 +4,7 @@ const shortId = require('shortid');
 const expressJWT = require('express-jwt');
 
 const User = require('../models/user');
-const { registerEmailParams } = require('../helpers/email');
+const { registerEmailParams, forgotPasswordEmailParams } = require('../helpers/email');
 
 AWS.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -137,4 +137,42 @@ exports.adminMiddleware = (req, res, next) => {
         req.profile = user;
         next();
     });
+}
+
+exports.forgotPassword = (req, res, next) => {
+    const { email } = req.body;
+    // check if user exists with provided email
+    User.findOne({email}).exec((err, user) => {
+        if (err ||!user) {
+            return res.status(401).json({
+                error: 'User with that email does not exist',
+            });
+        }
+        // generate new token
+        const token = jwt.sign({name: user.name}, process.env.JWT_RESET_PASSWORD, { expiresIn: '10m', });
+        // send email
+        const emailParams = forgotPasswordEmailParams(email, token);
+        //populate DB user 
+        return user.updateOne({resetPasswordLink: token}, (err, success) => {
+            if (err) {
+                return res.status(400).json({
+                    error: 'Password reset failed. Try later',
+                });
+            }
+            const sendEmail = ses.sendEmail(emailParams).promise();
+            sendEmail
+                .then(data => {
+                    console.log('ses reset password success', data)
+                    return res.json({
+                        message: `Email has been send to ${email}. Click the link to reset password`,
+                    });
+                })
+                .catch(err => {
+                    console.log('ses reset password failed', err)
+                    return res.json({
+                        error: `We could not verify your email. Try later`,
+                    });
+                })
+        })
+    })
 }
