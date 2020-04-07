@@ -9,9 +9,10 @@ require('dotenv').config();
 // import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const categoryRoutes = require('./routes/category');
 const app = express();
 
-mongoose.connect(process.env.DATABASE_CLOUD, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.DATABASE_CLOUD, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
     .then(() => console.log('DB started'))
     .catch(err => console.log(err))
 
@@ -22,6 +23,7 @@ app.use(cors({origin: process.env.CLIENT_URL}));
 
 app.use('/api', authRoutes);
 app.use('/api', userRoutes);
+app.use('/api', categoryRoutes);
 
 const port = process.env.PORT || 2000;
 app.listen(port, () => console.log(`API is running on port ${port}`));
