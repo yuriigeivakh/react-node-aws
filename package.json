@@ -21,7 +21,8 @@
     "mongoose": "^5.9.5",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.2",
-    "shortid": "^2.2.15"
+    "shortid": "^2.2.15",
+    "slugify": "^1.4.0"
   },
   "devDependencies": {
     "express-validator": "^6.4.0"
