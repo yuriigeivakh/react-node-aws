@@ -8,7 +8,7 @@ const { runValidation } = require('../validators')
 
 router.post('/category', runValidation, requireSignIn, adminMiddleware, create);
 
-router.post('/categories', list);
+router.get('/categories', list);
 
 router.get('/category/:slug', read);
 

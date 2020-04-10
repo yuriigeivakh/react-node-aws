@@ -55,8 +55,11 @@ exports.read = (req, res, next) => {
     //
 }
 
-exports.list = (req, res, next) => {
-    //
+exports.list = (_, res) => {
+    Category.find({}).exec((err, data) => {
+        if (err) res.status(400).json({ error: 'Category could not load' });
+        res.json(data);
+    })
 }
 
 exports.update = (req, res, next) => {
