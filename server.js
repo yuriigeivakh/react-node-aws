@@ -18,7 +18,7 @@ mongoose.connect(process.env.DATABASE_CLOUD, { useNewUrlParser: true, useUnified
 
 //aply middlewares
 app.use(morgan('dev'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '2mb', type: 'application/json', }));
 app.use(cors({origin: process.env.CLIENT_URL}));
 
 app.use('/api', authRoutes);

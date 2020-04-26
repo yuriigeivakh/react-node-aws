@@ -6,7 +6,7 @@ const { requireSignIn, adminMiddleware } = require('../controllers/auth')
 const { categoryCreateValidator, categoryUpdateValidator } = require('../validators/category')
 const { runValidation } = require('../validators')
 
-router.post('/category', runValidation, requireSignIn, adminMiddleware, create);
+router.post('/category', categoryCreateValidator, runValidation, requireSignIn, adminMiddleware, create);
 
 router.get('/categories', list);
 
