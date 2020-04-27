@@ -27,7 +27,6 @@ const categorySchema = new mongoose.Schema(
         postedBy: {
             type: mongoose.Schema.ObjectId,
             ref: 'User',
-            min: 2000,
         },
     },
     { timestamps: true },
