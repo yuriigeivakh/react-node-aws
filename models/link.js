@@ -14,12 +14,12 @@ const linkSchema = new mongoose.Schema(
             required: true,
             max: 256,
         },
-        slug: {
-            type: String,
-            lowercase: true,
-            required: true,
-            index: true,
-        },
+        // slug: {
+        //     type: String,
+        //     lowercase: true,
+        //     required: true,
+        //     index: true,
+        // },
         postedBy: {
             type: mongoose.Schema.ObjectId,
             ref: 'User',
