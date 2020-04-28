@@ -4,6 +4,7 @@ const formidable = require('formidable');
 const AWS = require('aws-sdk');
 const { v4: uuidv4 } = require('uuid')
 const Category = require('../models/category');
+const Link = require('../models/link');
 
 //s3
 const s3 = new AWS.S3({
@@ -45,8 +46,35 @@ exports.create = (req, res, next) => {
     })
 }
 
-exports.read = (req, res, next) => {
-    //
+exports.read = (req, res) => {
+    const { slug } = req.params;
+    const limitValue = req.body.limit ? parseInt(limit) : 10;
+    const skipValue = req.body.skip ? parseInt(skip) : 0;
+
+    Category.findOne({slug})
+        .populate('postedBy', '_id name username')
+        .exec((err, category) => {
+            if (err) {
+                return res.status(400).json({
+                    error: 'Could not find category',
+                });
+            }
+            Link
+                .find({categories: category})
+                .populate('postedBy', '_id name username')
+                .populate('categories', 'name')
+                .sort({createdAt: -1})
+                .limit(limitValue)
+                .skip(skipValue)
+                .exec((err, links) => {
+                    if (err) {
+                        return res.status(400).json({
+                            error: 'Could not load links of a category',
+                        });
+                    }
+                    res.json({category, links});
+                })
+        })
 }
 
 exports.list = (_, res) => {
