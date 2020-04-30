@@ -48,31 +48,25 @@ exports.create = (req, res, next) => {
 
 exports.read = (req, res) => {
     const { slug } = req.params;
-    const limitValue = req.body.limit ? parseInt(limit) : 10;
-    const skipValue = req.body.skip ? parseInt(skip) : 0;
 
-    Category.findOne({slug})
-        .populate('postedBy', '_id name username')
+    const limit= req.body.limit ? parseInt(req.body.limit) : 10;
+    const skip= req.body.skip ? parseInt(req.body.skip) : 0;
+
+    Category
+        .findOne({slug})
+        .populate('postedBy', '_id, name, username')
         .exec((err, category) => {
-            if (err) {
-                return res.status(400).json({
-                    error: 'Could not find category',
-                });
-            }
+            if (err) res.status(400).json({ error: 'Could not load category' });
             Link
                 .find({categories: category})
-                .populate('postedBy', '_id name username')
+                .populate('postedBy', '_id, name, username')
                 .populate('categories', 'name')
                 .sort({createdAt: -1})
-                .limit(limitValue)
-                .skip(skipValue)
+                .limit(limit)
+                .skip(skip)
                 .exec((err, links) => {
-                    if (err) {
-                        return res.status(400).json({
-                            error: 'Could not load links of a category',
-                        });
-                    }
-                    res.json({category, links});
+                    if (err) res.status(400).json({ error: 'Could not load links asociated to category' });
+                    return res.json({category, links});
                 })
         })
 }
