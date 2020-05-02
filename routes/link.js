@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { create, update, list, read, remove } = require('../controllers/link');
+const { create, update, list, read, remove, clickCount } = require('../controllers/link');
 const { requireSignIn, authMiddleware } = require('../controllers/auth');
 
 const { linkCreateValidator, linkUpdateValidator } = require('../validators/link');
@@ -10,6 +10,8 @@ const { runValidation } = require('../validators');
 router.post('/link', linkCreateValidator, runValidation, requireSignIn, authMiddleware, create);
 
 router.get('/links', list);
+
+router.put('/click-count', clickCount);
 
 router.get('/link/:slug', read);
 

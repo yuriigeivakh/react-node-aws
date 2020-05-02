@@ -13,12 +13,12 @@ const s3 = new AWS.S3({
     region: process.env.AWS_REGION
 });
 
-exports.create = (req, res, next) => {
+exports.create = (req, res) => {
     const { name, image, content } = req.body;
     const base64Data = new Buffer.from(image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
     const type = image.split(';')[0].split('/')[1];
 
-    const slug = slugify(name);
+    const slug = slugify(name, { remove: /[*+~.()'"!:@]/g });
     let category = new Category({name, content, slug});
 
     const params = {

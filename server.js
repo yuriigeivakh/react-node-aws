@@ -13,7 +13,7 @@ const categoryRoutes = require('./routes/category');
 const linkRoutes = require('./routes/link');
 const app = express();
 
-mongoose.connect(process.env.DATABASE_CLOUD, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
+mongoose.connect(process.env.DATABASE_CLOUD, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false })
     .then(() => console.log('DB started'))
     .catch(err => console.log(err))
 
