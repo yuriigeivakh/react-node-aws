@@ -2,9 +2,10 @@ const fs = require('fs');
 const slugify = require('slugify');
 const formidable = require('formidable');
 const AWS = require('aws-sdk');
-const { v4: uuidv4 } = require('uuid')
+
 const Category = require('../models/category');
 const Link = require('../models/link');
+const { createParams, uploadImage } = require('../helpers/imageUpload')
 
 //s3
 const s3 = new AWS.S3({
@@ -21,29 +22,9 @@ exports.create = (req, res) => {
     const slug = slugify(name, { remove: /[*+~.()'"!:@]/g });
     let category = new Category({name, content, slug});
 
-    const params = {
-        Bucket: 'react-node-aws',
-        Key: `category/${uuidv4()}.${type}`,
-        Body: base64Data,
-        ACL: 'public-read',
-        ContentEncoding: 'base64',
-        ContentType: `image/${type}`,
-    }
+    const params = createParams(type);
     
-    s3.upload(params, (err, data) => {
-        console.log('err', err)
-        if (err) res.status(400).json({ error: 'Upload to S3 failed' });
-        category.image.url = data.Location;
-        category.image.key = data.Key;
-        // posted by
-        category.postedBy = req.user._id;
-
-        //save to DB
-        category.save((err, success) => {
-            if (err) res.status(400).json({ error: 'Saving category to DB failed' });
-            return res.json(success);
-        })
-    })
+    uploadImage(params, category, req.user._id);
 }
 
 exports.read = (req, res) => {
@@ -78,8 +59,31 @@ exports.list = (_, res) => {
     })
 }
 
-exports.update = (req, res, next) => {
-    //
+exports.update = (req, res) => {
+    const { slug } = req.params;
+    const { name, image, content } = req.body;
+    Category
+        .findOneAndUpdate({slug}, {name, content}, {new: true})
+        .exec((err, category) => {
+            if (err) res.status(400).json({ error: 'Could not find category to update' });
+            if (image) {
+                const deleteParams = {
+                    Bucket: 'react-node-aws',
+                    Key: `category/${uuidv4()}.${type}`,
+                };
+
+                s3.deleteObject(deleteParams, (err, data) => {
+                    if (err) res.status(400).json({ error: 'S3 delete error during update' });
+                });
+
+                const params = createParams(type);
+                const response = uploadImage(params, category, req.user._id);
+                if (response.error) res.status(400).json(response.error);
+                return res.json(response);
+            } else {
+                return res.json(category);
+            }
+        })
 }
 
 exports.remove = (req, res, next) => {
