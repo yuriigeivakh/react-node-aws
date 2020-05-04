@@ -2,6 +2,7 @@ const fs = require('fs');
 const slugify = require('slugify');
 const formidable = require('formidable');
 const AWS = require('aws-sdk');
+const { v4: uuidv4 } = require('uuid');
 
 const Category = require('../models/category');
 const Link = require('../models/link');
@@ -22,7 +23,7 @@ exports.create = (req, res) => {
     const slug = slugify(name, { remove: /[*+~.()'"!:@]/g });
     let category = new Category({name, content, slug});
 
-    const params = createParams(type);
+    const params = createParams(type, base64Data);
     
     uploadImage(params, category, req.user._id);
 }
@@ -86,6 +87,20 @@ exports.update = (req, res) => {
         })
 }
 
-exports.remove = (req, res, next) => {
-    //
+exports.remove = (req, res) => {
+    const { slug } = req.params;
+    Category.findOneAndRemove({slug}).exec((err, category) => {
+        console.log('category', category)
+        if (err) res.status(400).json({ error: 'Could not find category for delete' });
+        const deleteParams = {
+            Bucket: 'react-node-aws',
+            Key: `category/${uuidv4()}.${category.image.key}`,
+        };
+
+        s3.deleteObject(deleteParams, (err, data) => {
+            if (err) res.status(400).json({ error: 'S3 delete error during update' });
+        });
+
+        res.json({message: 'Category deleted succesfully'})
+    })
 }

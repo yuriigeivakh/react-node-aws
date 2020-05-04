@@ -7,10 +7,10 @@ const s3 = new AWS.S3({
     region: process.env.AWS_REGION
 });
 
-exports.createParams = (type) => ({
+exports.createParams = (type, baseData) => ({
     Bucket: 'react-node-aws',
     Key: `category/${uuidv4()}.${type}`,
-    Body: base64Data,
+    Body: baseData,
     ACL: 'public-read',
     ContentEncoding: 'base64',
     ContentType: `image/${type}`,
