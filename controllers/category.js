@@ -65,12 +65,12 @@ exports.update = (req, res) => {
     const { name, image, content } = req.body;
     Category
         .findOneAndUpdate({slug}, {name, content}, {new: true})
-        .exec((err, category) => {
+        .exec(async (err, category) => {
             if (err) res.status(400).json({ error: 'Could not find category to update' });
             if (image) {
                 const deleteParams = {
                     Bucket: 'react-node-aws',
-                    Key: `category/${uuidv4()}.${type}`,
+                    Key: category.image.key,
                 };
 
                 s3.deleteObject(deleteParams, (err, data) => {
@@ -78,7 +78,7 @@ exports.update = (req, res) => {
                 });
 
                 const params = createParams(type);
-                const response = uploadImage(params, category, req.user._id);
+                const response = await uploadImage(params, category, req.user._id);
                 if (response.error) res.status(400).json(response.error);
                 return res.json(response);
             } else {
@@ -90,11 +90,10 @@ exports.update = (req, res) => {
 exports.remove = (req, res) => {
     const { slug } = req.params;
     Category.findOneAndRemove({slug}).exec((err, category) => {
-        console.log('category', category)
         if (err) res.status(400).json({ error: 'Could not find category for delete' });
         const deleteParams = {
             Bucket: 'react-node-aws',
-            Key: `category/${uuidv4()}.${category.image.key}`,
+            Key: category.image.key,
         };
 
         s3.deleteObject(deleteParams, (err, data) => {
