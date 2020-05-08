@@ -25,7 +25,26 @@ exports.create = (req, res) => {
 
     const params = createParams(type, base64Data);
     
-    uploadImage(params, category, req.user._id);
+    s3.upload(params, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(400).json({ error: 'Upload to s3 failed' });
+        }
+        console.log('AWS UPLOAD RES DATA', data);
+        category.image.url = data.Location;
+        category.image.key = data.Key;
+        // posted by
+        category.postedBy = req.user._id;
+
+        // save to db
+        category.save((err, success) => {
+            if (err) {
+                console.log(err);
+                res.status(400).json({ error: 'Duplicate category' });
+            }
+            return res.json(success);
+        });
+    });
 }
 
 exports.read = (req, res) => {
@@ -63,9 +82,13 @@ exports.list = (_, res) => {
 exports.update = (req, res) => {
     const { slug } = req.params;
     const { name, image, content } = req.body;
+
+    const base64Data = new Buffer.from(image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+    const type = image.split(';')[0].split('/')[1];
+
     Category
         .findOneAndUpdate({slug}, {name, content}, {new: true})
-        .exec(async (err, category) => {
+        .exec((err, category) => {
             if (err) res.status(400).json({ error: 'Could not find category to update' });
             if (image) {
                 const deleteParams = {
@@ -77,10 +100,24 @@ exports.update = (req, res) => {
                     if (err) res.status(400).json({ error: 'S3 delete error during update' });
                 });
 
-                const params = createParams(type);
-                const response = await uploadImage(params, category, req.user._id);
-                if (response.error) res.status(400).json(response.error);
-                return res.json(response);
+                const params = createParams(type, base64Data);
+                s3.upload(params, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                        res.status(400).json({ error: 'Upload to s3 failed' });
+                    }
+                    category.image.url = data.Location;
+                    category.image.key = data.Key;
+    
+                    // save to db
+                    category.save((err, success) => {
+                        if (err) {
+                            console.log(err);
+                            res.status(400).json({ error: 'Duplicate category' });
+                        }
+                        res.json(success);
+                    });
+                });
             } else {
                 return res.json(category);
             }
