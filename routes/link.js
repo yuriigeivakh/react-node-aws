@@ -13,10 +13,10 @@ router.get('/links', list);
 
 router.put('/click-count', clickCount);
 
-router.get('/link/:slug', read);
+router.get('/link/:id', read);
 
-router.put('/link/:slug', linkUpdateValidator, runValidation, requireSignIn, authMiddleware, update);
+router.put('/link/:id', linkUpdateValidator, runValidation, requireSignIn, authMiddleware, update);
 
-router.delete('/link/:slug', requireSignIn, authMiddleware, remove);
+router.delete('/link/:id', requireSignIn, authMiddleware, remove);
 
 module.exports = router;

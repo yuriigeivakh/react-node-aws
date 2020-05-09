@@ -18,6 +18,12 @@ const linkSchema = new mongoose.Schema(
             type: mongoose.Schema.ObjectId,
             ref: 'User',
         },
+        slug: {
+            type: String,
+            lowercase: true,
+            required: true,
+            index: true
+        },
         categories: [{
             type: mongoose.Schema.ObjectId,
             ref: 'Category',

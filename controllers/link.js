@@ -5,7 +5,9 @@ const Link = require('../models/link');
 // create, read, update, delete
 exports.create = (req, res) => {
     const { title, categories, url, medium, type } = req.body;
-    let link = new Link({ title, categories, url, medium, type });
+    const slug = url;
+    let link = new Link({ title, url, categories, type, medium, slug });
+    // posted by user
     link.postedBy = req.user._id;
     link.save((err, data) => {
         if (err) {
@@ -31,42 +33,35 @@ exports.list = (req, res) => {
 }
 
 exports.read = (req, res) => {
-    const { slug } = req.params;
-    const limitValue = req.body.limit ? parseInt(limit) : 10;
-    const skipValue = req.body.skip ? parseInt(skip) : 0;
+    const { id } = req.params;
 
-    Category.findOne({slug})
-        .populate('postedBy', '_id name username')
-        .exec((err, category) => {
+    Link.findOne({_id: id})
+        .exec((err, link) => {
             if (err) {
                 return res.status(400).json({
-                    error: 'Could not find category',
+                    error: 'Could not find Link',
                 });
             }
-            Link
-                .find({categories: category})
-                .populate('postedBy', '_id name username')
-                .populate('categories', 'name')
-                .sort({createdAt: -1})
-                .limit(limitValue)
-                .skip(skipValue)
-                .exec((err, links) => {
-                    if (err) {
-                        return res.status(400).json({
-                            error: 'Could not load links of a category',
-                        });
-                    }
-                    res.json({category, links});
-                })
+            res.json(link);
         })
 }
 
 exports.update = (req, res) => {
-    
+    const { id } = req.params;
+    const { title, url, categories, type, medium } = req.body;
+    Link.findOneAndUpdate({_id: id}, { title, url, categories, type, medium }, {new: true})
+        .exec((err, updated) => {
+            if (err) res.status(400).json({ error: 'Could not find link for delete' });
+            res.json(updated);
+        })
 }
 
 exports.remove = (req, res) => {
-    
+    const { id } = req.params;
+    Link.findOneAndRemove({id}).exec((err, category) => {
+        if (err) res.status(400).json({ error: 'Could not find link for delete' });
+        res.json({message: 'Link deleted succesfully'})
+    })
 }
 
 exports.clickCount = (req, res) => {
