@@ -58,7 +58,7 @@ exports.update = (req, res) => {
 
 exports.remove = (req, res) => {
     const { id } = req.params;
-    Link.findOneAndRemove({id}).exec((err, category) => {
+    Link.findOneAndRemove({_id: id}).exec((err) => {
         if (err) res.status(400).json({ error: 'Could not find link for delete' });
         res.json({message: 'Link deleted succesfully'})
     })
