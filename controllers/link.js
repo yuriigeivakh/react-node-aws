@@ -21,15 +21,23 @@ exports.create = (req, res) => {
 }
 
 exports.list = (req, res) => {
-    Link.find({}).exec((err, data) => {
-        if (err) {
-            console.log(err)
-            return res.status(400).json({
-                error: 'Could not list links',
-            });
-        }
-        res.json(data);
-    })
+    const limit= req.body.limit ? parseInt(req.body.limit) : 10;
+    const skip= req.body.skip ? parseInt(req.body.skip) : 0;
+
+    Link.find({})
+        .populate('postedBy', 'name')
+        .populate('categories', 'name slug')
+        .limit(limit)
+        .skip(skip)
+        .exec((err, data) => {
+            if (err) {
+                console.log(err)
+                return res.status(400).json({
+                    error: 'Could not list links',
+                });
+            }
+            res.json(data);
+        })
 }
 
 exports.read = (req, res) => {
