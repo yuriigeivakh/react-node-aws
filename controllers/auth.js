@@ -16,7 +16,7 @@ AWS.config.update({
 const ses = new AWS.SES({ apiVersion: '2010-12-01' });
 
 exports.register = (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, categories } = req.body;
 
     User.findOne({email}).exec((err, user) => {
         if (err) {
@@ -25,7 +25,7 @@ exports.register = (req, res) => {
             });
         }
         //generate token
-        const token = jwt.sign({name, password, email}, process.env.JWT_ACCOUNT_ACTIVATION, {
+        const token = jwt.sign({ name, password, email, categories }, process.env.JWT_ACCOUNT_ACTIVATION, {
             expiresIn: '10m',
         });
 
@@ -58,7 +58,7 @@ exports.registerActivate = (req, res) => {
             })
         }
 
-        const { name, password, email } = jwt.decode(token);
+        const { name, password, email, categories } = jwt.decode(token);
         const username = shortId.generate();
 
         User.findOne({email}).exec((err, user) => {
