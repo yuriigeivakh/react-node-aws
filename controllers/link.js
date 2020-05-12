@@ -1,6 +1,17 @@
-const slugify = require('slugify');
+const AWS = require('aws-sdk');
 
 const Link = require('../models/link');
+const User = require('../models/user');
+const Category = require('../models/category');
+const { linkPublishedParams } = require('../helpers/email');
+
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: 'us-east-1',
+});
+
+const ses = new AWS.SES({ apiVersion: '2010-12-01' });
 
 // create, read, update, delete
 exports.create = (req, res) => {
@@ -17,7 +28,23 @@ exports.create = (req, res) => {
             });
         }
         res.json(data);
-    })
+        User.find({categories: {$in: categories}}).exec((err, users) => {
+            if (err) throw new Error(err);
+            Category.find({_id: {$in: categories}}).exec((err, result) => {
+                data.categories = result;
+                users.forEach((element) => {
+                    const params = linkPublishedParams(element.email, data);
+                    const sendEmail = ses.sendEmail(params).promise();
+                    sendEmail
+                        .then(success => {
+                            console.log('Email send successfully', success)
+                            return 
+                        })
+                        .catch(err => console.log(err))
+                });
+            });
+        });
+    });
 }
 
 exports.list = (req, res) => {

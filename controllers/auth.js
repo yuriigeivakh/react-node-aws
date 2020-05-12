@@ -69,7 +69,7 @@ exports.registerActivate = (req, res) => {
             }
 
             // register new user
-            const newUser = new User({username, name, password, email});
+            const newUser = new User({username, name, password, email, categories});
             newUser.save((err, result) => {
                 if (err) {
                     return res.status(401).json({
