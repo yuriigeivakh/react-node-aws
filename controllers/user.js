@@ -17,3 +17,19 @@ exports.read = (req, res) => {
             })
     })
 }
+
+exports.update = (req, res, next) => {
+    const { name, password, categories } = req.body;
+
+    if (password && password.length < 6) res.status(400).json({ error: 'Password must be at least 6 characters long' });
+
+    User
+        .findOneAndUpdate({_id: req.user._id}, {name, password, categories}, {new: true})
+        .exec((err, user) => {
+            if (err) res.status(400).json({ error: 'Could not find user to update' });
+            user.hashes_password = undefined;
+            user.salt = undefined;
+
+            res.json(user);
+        });
+}
