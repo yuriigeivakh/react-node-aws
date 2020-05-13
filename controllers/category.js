@@ -55,12 +55,12 @@ exports.read = (req, res) => {
 
     Category
         .findOne({slug})
-        .populate('postedBy', '_id, name, username')
+        .populate('postedBy', '_id, name')
         .exec((err, category) => {
             if (err) res.status(400).json({ error: 'Could not load category' });
             Link
                 .find({categories: category})
-                .populate('postedBy', '_id, name, username')
+                .populate('postedBy', '_id, name')
                 .populate('categories', 'name')
                 .sort({createdAt: -1})
                 .limit(limit)
