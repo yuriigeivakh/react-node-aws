@@ -111,3 +111,35 @@ exports.clickCount = (req, res) => {
         res.json(result);
     });
 }
+
+exports.popular = (req, res) => {
+    Link
+        .find()
+        .populate('postedBy', 'name')
+        .sort({clicks: -1})
+        .limit(3)
+        .exec((err, links) => {
+            if (err) return res.status(400).json({error: 'Could not update view count'});
+            res.json(links);
+        });
+}
+
+exports.popularInCategory = (req, res) => {
+    const { category } = req.params;
+
+    Category
+        .findOne({slug})
+        .exec((err, category) => {
+            if (err) return res.status(400).json({error: 'Could not load category'});
+            Link
+                .find({categories: category})
+                .populate('postedBy', 'name')
+                .sort({clicks: -1})
+                .limit(3)
+                .exec((err, links) => {
+                    if (err) return res.status(400).json({error: 'Could not update view count'});
+                    res.json(links);
+                });
+        });
+}
+    
