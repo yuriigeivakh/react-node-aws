@@ -101,7 +101,7 @@ exports.remove = (req, res) => {
 
 exports.clickCount = (req, res) => {
     const { linkId } = req.body;
-    Link.findOneAndUpdate(linkId, { $inc: { clicks: 1 } }, { upsert: true, new: true }).exec((err, result) => {
+    Link.findOneAndUpdate({_id: linkId}, { $inc: { clicks: 1 } }, { upsert: true, new: true }).exec((err, result) => {
         if (err) {
             console.log(err)
             return res.status(400).json({
