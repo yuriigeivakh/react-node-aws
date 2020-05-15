@@ -15,7 +15,7 @@ router.put('/click-count', clickCount);
 
 router.get('/link/popular', popular);
 router.get('/link/:id', read);
-router.get('/link/popular/:category', popularInCategory);
+router.get('/link/popular/:slug', popularInCategory);
 
 router.put('/link/:id', linkUpdateValidator, runValidation, requireSignIn, authMiddleware, canUpdateDeleteLink, update);
 router.put('/link/admin/:id', linkUpdateValidator, runValidation, requireSignIn, adminMiddleware, update);

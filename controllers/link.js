@@ -125,7 +125,7 @@ exports.popular = (req, res) => {
 }
 
 exports.popularInCategory = (req, res) => {
-    const { category } = req.params;
+    const { slug } = req.params;
 
     Category
         .findOne({slug})
