@@ -106,7 +106,7 @@ exports.login = (req, res) => {
     })
 }
 
-exports.requireSignIn = expressJWT({ secret: String(process.env.JWT_SECRET) });
+exports.requireSignIn = expressJWT({ secret: String(process.env.JWT_SECRET), algorithms: ['RS256'] });
 
 exports.authMiddleware = (req, res, next) => {
     const authUserId = req.user._id;
